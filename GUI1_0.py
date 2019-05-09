@@ -80,4 +80,4 @@ class MyVideoCapture:
             self.vid.release()
 
 # Create a window and pass it to the Application object
-App(tkinter.Tk(), "CarCard Recognize")
+App(tkinter.Tk(), "CarCardRecognition")
