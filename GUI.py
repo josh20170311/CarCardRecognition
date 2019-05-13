@@ -3,6 +3,7 @@ import cv2
 import PIL.Image, PIL.ImageTk
 import time
 #import license_module as m
+import recognition_module as m
 
 class App:
     def __init__(self, window, window_title, video_source=0):
@@ -11,6 +12,7 @@ class App:
         self.video_source = video_source
         #Variables
         self.fileName = tkinter.StringVar()
+        self.result = tkinter.StringVar()
         self.fileName.set(time.strftime("%y-%m-%d-%H-%M-%S-snapshot",time.localtime()))
         # open video source (by default this will try to open the computer webcam)
         self.vid = MyVideoCapture(self.video_source)
@@ -18,6 +20,9 @@ class App:
         # Create a canvas that can fit the above video source size
         self.canvas = tkinter.Canvas(window, width = self.vid.width, height = self.vid.height)
         self.canvas.pack()
+        #Result Label
+        self.lb = tkinter.Label(window,text = "Result",textvariable = self.result,width = 50)
+        self.lb.pack(anchor = tkinter.W, expand = True)
         #TextBox that set the name of snapshot
         self.tb = tkinter.Entry(window,text = "snapshot",textvariable = self.fileName,width = 50)
         self.tb.pack(anchor = tkinter.W , expand = True)
@@ -25,7 +30,7 @@ class App:
         self.btn_snapshot=tkinter.Button(window, text="Snapshot" , width=50, command=self.snapshot)
         self.btn_snapshot.pack(anchor=tkinter.W, expand=True)
         # Button that sends snapshot to the azure api
-        self.btn_send=tkinter.Button(window, text="Recognize(under construction)", width=50, command=self.Send)
+        self.btn_send=tkinter.Button(window, text="Recognize", width=50, command=self.Run)
         self.btn_send.pack(anchor=tkinter.W, expand=True)
 
         # After it is called once, the update method will be automatically called every delay milliseconds
@@ -33,9 +38,8 @@ class App:
         self.update()
 
         self.window.mainloop()
-    def Send(self):
-        pass
-
+    def Run(self):
+        self.result = m.Recognize("car.jpg","./TR/ETD.pb")
     def snapshot(self):
         if self.fileName.get() == "":
             self.fileName.set("snapshot")
@@ -84,4 +88,4 @@ class MyVideoCapture:
             self.vid.release()
 
 # Create a window and pass it to the Application object
-App(tkinter.Tk(), "CarCardRecognition")
+App(tkinter.Tk(), "CarCardRecognition",video_source = 1)
