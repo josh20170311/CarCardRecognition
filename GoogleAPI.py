@@ -20,8 +20,9 @@ def send(imagefile="TR/images/car1.jpg"):
 
     # performs label detection on the image file
     response = client.document_text_detection(image=image)
-
+    print(response)
     labels = response.text_annotations
+    print(labels)
     # Take out the text
     testlist = labels[0].description.split("\n")
     print('Labels:')
@@ -30,7 +31,11 @@ def send(imagefile="TR/images/car1.jpg"):
         match = re.match(r"^[\w]{2,4}[-, ][\w]{2,4}$", i)
         if match:
             returnlist.append(i)
-    return returnlist[0]
+    if len(returnlist):
+        return returnlist[0]
+    else:
+        return "None"
 
 
-# print(send())
+def test():
+    print(send())

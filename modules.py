@@ -29,16 +29,16 @@ class MyApp:
         self.window.mainloop()
 
     def getText(self):
-        self.result.set(G.send(self.fileName.get() + ".jpg"))
+        self.result.set(G.send("images/"+self.fileName.get() + ".jpg"))
 
     def initwidgets(self):
 
         self.vid = MyVideoCapture(self.video_source)
         self.canvas = tkinter.Canvas(self.window, width=self.vid.width, height=self.vid.height)
-        self.lb = tkinter.Label(self.window, text="Result", textvariable=self.result, width=50)
-        self.tb = tkinter.Entry(self.window, text="snapshot", textvariable=self.fileName, width=30)
-        self.btn_snapshot = tkinter.Button(self.window, text="Snapshot", height=3, width=30, command=self.snapshot)
-        self.btn_send = tkinter.Button(self.window, text="Recognize", width=50, command=self.getText)
+        self.lb = tkinter.Label(self.window, text="Result", textvariable=self.result)
+        self.tb = tkinter.Entry(self.window, text="snapshot", textvariable=self.fileName)
+        self.btn_snapshot = tkinter.Button(self.window, text="Snapshot", command=self.snapshot)
+        self.btn_send = tkinter.Button(self.window, text="Recognize", command=self.getText)
 
         self.canvas.pack()
         self.lb.pack()
@@ -61,7 +61,7 @@ class MyApp:
 
         if ret:
             self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame))
-            self.canvas.create_image(0, 0, image=self.photo, anchor = tkinter.N)
+            self.canvas.create_image(0, 0, image=self.photo, anchor = tkinter.NW)
 
         self.window.after(self.delay, self.update)
 
@@ -75,7 +75,7 @@ class MyVideoCapture:
 
         # Get video source width and height
         self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
-        self.height = 360
+        self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
     def get_frame(self):
         if self.vid.isOpened():
             ret, frame = self.vid.read()

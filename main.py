@@ -1,4 +1,4 @@
-import modules as m
+from modules import MyApp
 import tkinter
 
-app = m.MyApp(tkinter.Tk(),"MyApp")
+MyApp(tkinter.Tk(), "MyApp")
