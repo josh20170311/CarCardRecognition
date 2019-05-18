@@ -1,4 +1,3 @@
-from modules import MyApp
-import tkinter
+from gui import MyApp
 
-MyApp(tkinter.Tk(), "MyApp")
+MyApp()

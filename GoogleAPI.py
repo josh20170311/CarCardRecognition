@@ -7,7 +7,7 @@ from google.cloud import vision
 from google.cloud.vision import types
 
 
-def send(imagefile="TR/images/car1.jpg"):
+def send(imagefile="TR/images/c.jpg"):
     # instantiates a client
     client = vision.ImageAnnotatorClient()
     # the name of the image file to annotate
@@ -20,19 +20,17 @@ def send(imagefile="TR/images/car1.jpg"):
 
     # performs label detection on the image file
     response = client.document_text_detection(image=image)
-    print(response)
     labels = response.text_annotations
-    print(labels)
     # Take out the text
     testlist = labels[0].description.split("\n")
     print('Labels:')
     returnlist = []
     for i in testlist:
         match = re.match(r"^[\w]{2,4}[-, ][\w]{2,4}$", i)
-        if match:
+        if 1:
             returnlist.append(i)
     if len(returnlist):
-        return returnlist[0]
+        return returnlist
     else:
         return "None"
 
