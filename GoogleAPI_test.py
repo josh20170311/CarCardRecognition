@@ -6,7 +6,7 @@ from google.cloud.vision import types
 #instantiates a client
 client = vision.ImageAnnotatorClient()
 #the name of the image file to annotate
-file_name = os.path.join(os.path.dirname(__file__),'TR\\images\\car1.jpg')
+file_name = os.path.join(os.path.dirname(__file__),'TR\\images\\TaiwanStreet.jpg')
 #loads the image into memory
 with io.open(file_name,'rb') as image_file :
     content = image_file.read()
@@ -15,7 +15,8 @@ image = types.Image(content = content)
 
 #performs label dtection on the image file
 response = client.text_detection(image = image)
-labels = response.text_annotations
-print('Labels:')
-for label in labels:
-    print(label.description)
+print(response)
+#labels = response.text_annotations
+#print('Labels:')
+#for label in labels:
+#    print(label.description)
