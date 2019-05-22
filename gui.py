@@ -5,6 +5,7 @@ import PIL.ImageTk
 import time
 from tkinter import messagebox
 import os
+import io
 
 import GoogleAPI as G
 
