@@ -10,7 +10,7 @@ import GoogleAPI as G
 
 
 class MyApp:
-    def __init__(self, window=tkinter.Tk(), window_title="VLPR", video_source=0):
+    def __init__(self, window=tkinter.Tk(), window_title="ALPR", video_source=0):
 
         self.window = window
         self.window.title(window_title)
@@ -31,7 +31,8 @@ class MyApp:
         self.window.mainloop()
 
     def OCR(self):
-        self.result.set(G.send("images/" + self.fileName.get() + ".jpg"))
+        # self.result.set(G.send("images/" + self.fileName.get() + ""))
+        messagebox.showinfo(title="result", detail=G.send("images/" + self.fileName.get() + ""))
 
     def initwidgets(self):
 
@@ -42,14 +43,16 @@ class MyApp:
         self.preview_canvas = tkinter.Canvas(self.window, width=self.preview.width(), height=self.preview.height())
         self.preview_canvas.create_image(0, 0, image=self.preview, anchor=tkinter.NW)
         self.messagebox = messagebox.Message()
-
-        self.lb = tkinter.Label(self.window, text="Result", textvariable=self.result, font=("arial", 30))
+        self.message_result = messagebox.Message()
+        self.lb = tkinter.Label(self.window, text="Result", textvariable=self.result, font=("arial", 15))
         self.btn_snapshot = tkinter.Button(self.window, width=10, height=1, text="Snapshot", command=self.snapshot,
-                                           font=("arial", 30), bg='green', fg='white')
+                                           font=("arial", 15), bg='green', fg='white')
         self.btn_send = tkinter.Button(self.window, width=10, height=1, text="Recognize", command=self.OCR,
-                                       font=("arial", 30), bg='blue', fg='white')
+                                       font=("arial", 15), bg='blue', fg='white')
         self.btn_quit = tkinter.Button(self.window, width=10, height=1, text="QUIT", command=self.window.quit,
-                                       font=("arial", 30), bg='red', fg='white')
+                                       font=("arial", 15), bg='red', fg='white')
+        self.btn_delete = tkinter.Button(self.window, width=10, height=1, text="DELETE", command=self.delete,
+                                         font=("arial", 15), bg='red', fg='green')
         self.listb = tkinter.Listbox(self.window, height=20, width=65, font=("arial", 15))
         self.makeimageslist()
 
@@ -61,22 +64,21 @@ class MyApp:
         self.lb.grid(column=1, row=1)
         self.btn_snapshot.grid(column=1, row=2)
         self.btn_send.grid(column=1, row=3)
-        self.btn_quit.grid(column=1, row=4)
+        self.btn_delete.grid(column=1, row=4)
+        self.btn_quit.grid(column=1, row=5)
 
     def makemenu(self):
         self.main_menu = tkinter.Menu(self.window)
         self.window.config(menu=self.main_menu)
         self.file_menu = tkinter.Menu(tearoff=False)
         self.main_menu.add("cascade", label="File", menu=self.file_menu)
-        self.file_menu.add("command", label='Save File', command=self.window.quit)
-        self.file_menu.add("command", label='Open Image', command=self.window.quit)
-        self.file_menu.add("command", label='quit', command=self.window.quit)
-        self.file_menu.add("command", label='quit', command=self.window.quit)
-        self.file_menu.add("command", label='quit', command=self.window.quit)
+        self.file_menu.add("command", label='Save File', command=self.savefile)
+        self.file_menu.add("command", label='Open Image', command=self.opentheimage)
+        self.file_menu.add("command", label='Quit', command=self.window.quit)
         self.main_menu.add("command", label="about", command=self.about)
 
-    def about(self):
-        messagebox.showinfo(title='about', message='message', detail='detail')
+    def about(self):  # under construction
+        messagebox.showinfo(title='about', detail='Author : Josh.Ji\nReference : ...')
 
     def snapshot(self):
         if self.fileName.get() == "":
@@ -87,6 +89,15 @@ class MyApp:
         if ret:
             cv2.imwrite("images/" + self.fileName.get() + ".png", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
         self.makeimageslist()
+
+    def delete(self):  # under construction
+        pass
+
+    def savefile(self):  # under construction
+        pass
+
+    def opentheimage(self):  # under construction
+        pass
 
     def update(self):
         # Get a frame from the video source
@@ -107,9 +118,10 @@ class MyApp:
 
     def selection_event(self):
         if self.listb.curselection() != () and self.listb.curselection() != self.lastselect:
-            self.preview = tkinter.PhotoImage(file='images/'+self.listb.get(self.listb.curselection()))
+            self.fileName.set(self.listb.get(self.listb.curselection()))
+            self.preview = tkinter.PhotoImage(file='images/' + self.listb.get(self.listb.curselection()))
             self.preview = self.preview.zoom(24)
-            self.preview = self.preview.subsample(int(self.preview.height()/250))
+            self.preview = self.preview.subsample(int(self.preview.height() / 250))
             self.preview_canvas.create_image(0, 0, image=self.preview, anchor=tkinter.NW)
             self.lastselect = self.listb.curselection()
 
