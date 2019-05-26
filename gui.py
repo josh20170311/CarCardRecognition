@@ -8,6 +8,7 @@ from tkinter import filedialog
 import os
 
 import GoogleAPI as G
+import ALPR as A
 
 
 class MyApp:
@@ -68,7 +69,7 @@ class MyApp:
         self.btn_snapshot = tkinter.Button(self.window, width=10, height=1, text="Snapshot", command=self.snapshot,
                                            font=("arial", 15), bg='green', fg='white')
         self.btn_send = tkinter.Button(self.window, width=10, height=1, text="Recognize",
-                                       command=self.result_from_google, font=("arial", 15), bg='blue', fg='white')
+                                       command=self.ALPR, font=("arial", 15), bg='blue', fg='white')
         self.btn_delete = tkinter.Button(self.window, width=10, height=1, text="DELETE", command=self.delete,
                                          font=("arial", 15), bg='red', fg='white')
         self.btn_quit = tkinter.Button(self.window, width=10, height=1, text="QUIT", command=self.window.quit,
@@ -151,7 +152,9 @@ class MyApp:
         messagebox.showinfo(title='nothing', message='nothing', detail='you have to uncomment the function')
 
     def ALPR(self):  # under construction
-        pass
+        org = cv2.imread("images/19-05-26-23-07-02-snapshot.png")
+        messagebox.showinfo(message=A.alpr(image=org))
+        # self.result.set(A.alpr(image=self.vid.get_frame()[1]))
 
     def update(self):  # Calling every 15ms
         # Get a frame from the video source
