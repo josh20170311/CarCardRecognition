@@ -1,4 +1,5 @@
 import tkinter
+import tkinter.tix
 import cv2
 import PIL.Image
 import PIL.ImageTk
@@ -13,10 +14,10 @@ import ALPR as A
 
 class MyApp:
     # consts
-    IMAGE_DIR = "images"
+    IMAGE_DIR = "images/"
     NOFILEIMAGE_DIR = "TR/images/noimagefile.jpg"
 
-    def __init__(self, window=tkinter.Tk(), window_title="ALPR", video_source=0):
+    def __init__(self, window=tkinter.tix.Tk(), window_title="ALPR", video_source=0):
 
         # create a top-window
         self.window = window
@@ -40,7 +41,7 @@ class MyApp:
         self.makemenu()
 
         # After it is called once, the update method will be automatically called every delay milliseconds
-        self.delay = 50
+        self.delay = 15
         self.update()
 
         # start the app
@@ -78,6 +79,11 @@ class MyApp:
         # listbox
         self.listb = tkinter.Listbox(self.window, height=20, width=58, font=("arial", 15))
 
+        # combobox
+        self.cb = tkinter.tix.ComboBox(self.window, listwidth=300, editable=1)
+        self.cb.config
+
+
         # pre-process
         self.makeimageslist()
         self.listb.selection_handle(command=self.selection_event())
@@ -85,7 +91,7 @@ class MyApp:
         # layout
         self.canvas.grid(column=0, row=0, ipadx=0, padx=50)
         self.preview_canvas.grid(column=1, row=0)
-        self.listb.grid(column=0, row=1)
+        self.cb.grid(column=0, row=1)
         self.lb.place(x=self.BASE_X, y=self.BASE_Y)
         self.btn_snapshot.place(x=self.BASE_X, y=self.BASE_Y+50)
         self.btn_send.place(x=self.BASE_X, y=self.BASE_Y+100)
@@ -115,9 +121,11 @@ class MyApp:
 
     def makeimageslist(self):
         self.listb.delete(0, last=self.listb.size() - 1)
+        self.cb.slistbox.listbox.delete(0, tkinter.tix.END)
         imlist = os.listdir('./images')
         for x in imlist:
             self.listb.insert(imlist.index(x), str(x))
+            self.cb.insert(imlist.index(x), str(x))
 
     def selection_event(self):
         if self.listb.curselection() != () and self.listb.curselection() != self.last_index:
@@ -152,16 +160,22 @@ class MyApp:
         messagebox.showinfo(title='nothing', message='nothing', detail='you have to uncomment the function')
 
     def ALPR(self):  # under construction
-        org = cv2.imread("images/19-05-26-23-07-02-snapshot.png")
-        messagebox.showinfo(message=A.alpr(image=org))
+        print(self.IMAGE_DIR+self.current_image)
+        org = cv2.imread(self.IMAGE_DIR+self.current_image)
+        print(A.alpr(image=org))
+        # messagebox.showinfo(message=A.alpr(image=org))
         # self.result.set(A.alpr(image=self.vid.get_frame()[1]))
 
-    def update(self):  # Calling every 15ms
+    def update(self):
         # Get a frame from the video source
         ret, frame = self.vid.get_frame()
 
+        t, rec = A.alpr(image=frame)
+        print(t)
+        self.result.set(t)
+
         if ret:
-            self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame))
+            self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(rec))
             self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
 
         self.selection_event()
@@ -194,3 +208,10 @@ class MyVideoCapture:
     def __del__(self):
         if self.vid.isOpened():
             self.vid.release()
+
+
+def test():
+    app = MyApp()
+
+
+test()

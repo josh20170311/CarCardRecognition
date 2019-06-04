@@ -2,39 +2,48 @@ import cv2
 import pytesseract
 import re
 
-def alpr(imagefile="TR/images/c13.jpg" , image=None):
-
+KSIZE = 3
+SIGMA_X = 20
+THRESHOLD = 50
+MAX = 256
+def alpr(imagefile="TR/images/c13.jpg" , image=None, th1 = THRESHOLD, th2=MAX):
     list_results = []
-    print("imagefile = ", imagefile)
+    list_boxes = []
     org = image
-    blur = cv2.GaussianBlur(org, (3, 3), 10)
-    canny = cv2.Canny(blur, 29, 100)
+    org_rec = org
+    gray = cv2.cvtColor(org, cv2.COLOR_RGB2GRAY)
+    blur = cv2.GaussianBlur(gray, (KSIZE, KSIZE), SIGMA_X)
+    canny = cv2.Canny(blur, th1, th2)
     (contours, _) = cv2.findContours(canny, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(canny, contours, -1, (255, 0, 0), thickness=1)
-    # cv2.imshow("canny", canny)
+
     for i in range(0, len(contours)):
-        # print(i)
-        rec = cv2.boundingRect(contours[i])  # draw a rec
-        # print(rec)
+        rec = cv2.boundingRect(contours[i])  # get rectangle from each contour
+
         x, y, w, h = rec
         r = w/h
-        if r > 2.375*1.1 or r < 2.375*0.9 or h < 20 or w < 50:
+        if r > 2.375*1.1 or r < 2.375*0.9 or h < 20 or w < 50 or h > 150 or w > 200:
             continue
-        # print(r)
-        cv2.rectangle(org.copy(), (rec[0], rec[1]), (rec[0] + rec[2], rec[1] + rec[3]), (0, 0, 255), 0)
-        # cv2.imshow("org", org)
+
+
         cut = org[y:y+h, x:x+w]
         t = pytesseract.image_to_string(cut, config="-l eng --oem 1 --psm 7")  # OCR
-        list_results.append(t)
         print(t)
-        # cv2.imshow("org", cut)
-        # k = cv2.waitKey(0)
-        # if k == 13:
-           # cv2.imshow("org", org)
-           # cv2.waitKey(0)
-           # break
-    for x in list_results:
-        match = re.match(r'^[\w]{2,4}[., ][\w]{2,4}$', x)
+        cv2.rectangle(org, (x, y), (x+w, y+h), (255, 0, 0))
+
+
+        list_results.append(t)
+        list_boxes.append(rec)
+    for i in range(0, len(list_results)):
+        t = list_results[i]
+        match = re.match(r'^[\w]{6,7}$', t)
+        x, y, w, h = list_boxes[i]
         if match:
-            return x
-    return "Not found"
+            cv2.putText(org_rec, t, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
+            return x, org_rec
+    return "Not Found", org_rec
+
+
+def canny_result(image=None):
+    blur = cv2.GaussianBlur(image, (KSIZE, KSIZE), SIGMA_X)
+    canny = cv2.Canny(blur, THRESHOLD, MAX)
+    return canny
