@@ -4,9 +4,19 @@ import re
 
 KSIZE = 3
 SIGMA_X = 20
-THRESHOLD = 50
+THRESHOLD = 29
 MAX = 256
-def alpr(imagefile="TR/images/c13.jpg" , image=None, th1 = THRESHOLD, th2=MAX):
+
+
+def formatk(s):
+    t = ''
+    for x in s:
+        if x not in "0123456789QWERTYUIOPASDFGHJKLZXCVBNM":
+            continue
+        t += x
+    return t
+
+def alpr(imagefile="TR/images/c13.jpg", image=None, th1=THRESHOLD, th2=MAX):
     list_results = []
     list_boxes = []
     org = image
@@ -20,16 +30,16 @@ def alpr(imagefile="TR/images/c13.jpg" , image=None, th1 = THRESHOLD, th2=MAX):
         rec = cv2.boundingRect(contours[i])  # get rectangle from each contour
 
         x, y, w, h = rec
-        r = w/h
-        if r > 2.375*1.1 or r < 2.375*0.9 or h < 20 or w < 50 or h > 150 or w > 200:
+        r = w / h
+        if r > 2.375 * 1.1 or r < 2.375 * 0.9 or w < 50 or h < 50:
             continue
 
-
-        cut = org[y:y+h, x:x+w]
+        cut = org[y:y + h, x:x + w]
         t = pytesseract.image_to_string(cut, config="-l eng --oem 1 --psm 7")  # OCR
+        t = formatk(t)
         print(t)
-        cv2.rectangle(org, (x, y), (x+w, y+h), (255, 0, 0))
 
+        cv2.rectangle(org_rec, (x, y), (x+w, y+h), (255, 0, 0), thickness=2)
 
         list_results.append(t)
         list_boxes.append(rec)
@@ -38,8 +48,8 @@ def alpr(imagefile="TR/images/c13.jpg" , image=None, th1 = THRESHOLD, th2=MAX):
         match = re.match(r'^[\w]{6,7}$', t)
         x, y, w, h = list_boxes[i]
         if match:
-            cv2.putText(org_rec, t, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
-            return x, org_rec
+            cv2.putText(canny, t, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
+            return t, org_rec
     return "Not Found", org_rec
 
 

@@ -7,7 +7,7 @@ from google.cloud import vision
 from google.cloud.vision import types
 
 
-def send(imagefile="TR/images/c.jpg"):
+def send(imagefile="TR/images/c2.jpg"):
     # instantiates a client
     client = vision.ImageAnnotatorClient()
 
@@ -35,5 +35,5 @@ def send(imagefile="TR/images/c.jpg"):
     return "None"
 
 
-def test():
-    print(send())
+# print(send())
+

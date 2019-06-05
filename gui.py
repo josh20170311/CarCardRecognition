@@ -1,5 +1,5 @@
 import tkinter
-import tkinter.tix
+import tkinter.ttk
 import cv2
 import PIL.Image
 import PIL.ImageTk
@@ -10,14 +10,14 @@ import os
 
 import GoogleAPI as G
 import ALPR as A
-
+import checkout_system as C
 
 class MyApp:
     # consts
     IMAGE_DIR = "images/"
     NOFILEIMAGE_DIR = "TR/images/noimagefile.jpg"
 
-    def __init__(self, window=tkinter.tix.Tk(), window_title="ALPR", video_source=0):
+    def __init__(self, window=tkinter.Tk(), window_title="ALPR", video_source=1):
 
         # create a top-window
         self.window = window
@@ -69,8 +69,8 @@ class MyApp:
         # button
         self.btn_snapshot = tkinter.Button(self.window, width=10, height=1, text="Snapshot", command=self.snapshot,
                                            font=("arial", 15), bg='green', fg='white')
-        self.btn_send = tkinter.Button(self.window, width=10, height=1, text="Recognize",
-                                       command=self.ALPR, font=("arial", 15), bg='blue', fg='white')
+        self.btn_send = tkinter.Button(self.window, width=10, height=1, text="Google API",
+                                       command=self.result_from_google, font=("arial", 15), bg='blue', fg='white')
         self.btn_delete = tkinter.Button(self.window, width=10, height=1, text="DELETE", command=self.delete,
                                          font=("arial", 15), bg='red', fg='white')
         self.btn_quit = tkinter.Button(self.window, width=10, height=1, text="QUIT", command=self.window.quit,
@@ -80,8 +80,7 @@ class MyApp:
         self.listb = tkinter.Listbox(self.window, height=20, width=58, font=("arial", 15))
 
         # combobox
-        self.cb = tkinter.tix.ComboBox(self.window, listwidth=300, editable=1)
-        self.cb.config
+        self.cb = tkinter.ttk.Combobox(self.window, width=58, textvariable=self.fileName)
 
 
         # pre-process
@@ -92,11 +91,12 @@ class MyApp:
         self.canvas.grid(column=0, row=0, ipadx=0, padx=50)
         self.preview_canvas.grid(column=1, row=0)
         self.cb.grid(column=0, row=1)
+
         self.lb.place(x=self.BASE_X, y=self.BASE_Y)
-        self.btn_snapshot.place(x=self.BASE_X, y=self.BASE_Y+50)
-        self.btn_send.place(x=self.BASE_X, y=self.BASE_Y+100)
-        self.btn_delete.place(x=self.BASE_X, y=self.BASE_Y+150)
-        self.btn_quit.place(x=self.BASE_X, y=self.BASE_Y+200)
+        self.btn_snapshot.place(x=self.BASE_X, y=self.BASE_Y + 50)
+        self.btn_send.place(x=self.BASE_X, y=self.BASE_Y + 100)
+        self.btn_delete.place(x=self.BASE_X, y=self.BASE_Y + 150)
+        self.btn_quit.place(x=self.BASE_X, y=self.BASE_Y + 200)
 
     def makemenu(self):
         self.main_menu = tkinter.Menu(self.window)
@@ -115,17 +115,12 @@ class MyApp:
         askfilename = filedialog.askopenfilename(filetypes=(("png files", "*.png"), ("all files", "*.*")))
         print(askfilename)
 
-
     def about(self):  # under construction
-        messagebox.showinfo(title='about', detail='Author : Josh.Ji\nReference : ...')
+        messagebox.showinfo(title='about', detail='Reference : \nPython OpenCV - show a video in a Tkinter window by Paul')
 
     def makeimageslist(self):
-        self.listb.delete(0, last=self.listb.size() - 1)
-        self.cb.slistbox.listbox.delete(0, tkinter.tix.END)
         imlist = os.listdir('./images')
-        for x in imlist:
-            self.listb.insert(imlist.index(x), str(x))
-            self.cb.insert(imlist.index(x), str(x))
+        self.cb['values'] = imlist
 
     def selection_event(self):
         if self.listb.curselection() != () and self.listb.curselection() != self.last_index:
@@ -140,41 +135,42 @@ class MyApp:
 
     def snapshot(self):
         self.timeStamp = self.getTimeStamp()
-        self.fileName.set(self.timeStamp)
+        self.fileName.set("snapshot.png")
 
         # Get a frame from the video source
         ret, frame = self.vid.get_frame()
 
         if ret:
-            cv2.imwrite("images/" + self.fileName.get() + ".png", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+            cv2.imwrite("images/" + self.fileName.get(), cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
         self.makeimageslist()
 
     def delete(self):  # under construction
-        pass
+        app2 = C.Checkout()
 
     def getTimeStamp(self):
-        return time.strftime("%y-%m-%d-%H-%M-%S-snapshot", time.localtime())
+        return time.strftime("%Y-%m-%d-%H-%M-%S-snapshot", time.localtime())
 
     def result_from_google(self):
-        # messagebox.showinfo(title="result", detail=G.send("images/" + self.fileName.get() + ""))
-        messagebox.showinfo(title='nothing', message='nothing', detail='you have to uncomment the function')
+        xxx = G.send(imagefile=self.IMAGE_DIR + self.fileName.get())
+        messagebox.showinfo(title="result", detail=xxx)
+        # messagebox.showinfo(title='nothing', message='nothing', detail='you have to uncomment the function')
 
     def ALPR(self):  # under construction
-        print(self.IMAGE_DIR+self.current_image)
-        org = cv2.imread(self.IMAGE_DIR+self.current_image)
+        print(self.IMAGE_DIR + self.current_image)
+        org = cv2.imread(self.IMAGE_DIR + self.current_image)
         print(A.alpr(image=org))
         # messagebox.showinfo(message=A.alpr(image=org))
         # self.result.set(A.alpr(image=self.vid.get_frame()[1]))
 
     def update(self):
         # Get a frame from the video source
-        ret, frame = self.vid.get_frame()
+        success, frame = self.vid.get_frame()
+        print(self.cb.get())
 
         t, rec = A.alpr(image=frame)
-        print(t)
         self.result.set(t)
 
-        if ret:
+        if success:
             self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(rec))
             self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
 
@@ -210,8 +206,4 @@ class MyVideoCapture:
             self.vid.release()
 
 
-def test():
-    app = MyApp()
-
-
-test()
+app = MyApp()
