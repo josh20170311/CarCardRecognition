@@ -16,7 +16,7 @@ import checkout_system as C
 class MyApp:
     # consts
     IMAGE_DIR = "images/"
-    NOFILEIMAGE_DIR = "TR/images/noimagefile.jpg"
+    NOFILEIMAGE_DIR = "noimagefile.jpg"
 
     def __init__(self, window=tkinter.Tk(), window_title="ALPR", video_source=1):
 
@@ -149,11 +149,14 @@ class MyApp:
         app2 = C.Checkout()
 
     def getTimeStamp(self):
-        return time.strftime("%Y-%m-%d-%H-%M-%S-snapshot", time.localtime())
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     def result_from_google(self):
-        xxx = G.send(imagefile=self.IMAGE_DIR + self.fileName.get())
-        messagebox.showinfo(title="result", detail=xxx)
+        result = G.send(imagefile=self.IMAGE_DIR + self.fileName.get())
+        messagebox.showinfo(title="result", detail=result)
+        with open("carinfo.txt", "a") as f:
+            f.write(result+","+self.getTimeStamp()+"\n")
+            f.flush()
         # messagebox.showinfo(title='nothing', message='nothing', detail='you have to uncomment the function')
 
     def ALPR(self):  # under construction
