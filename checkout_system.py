@@ -9,26 +9,29 @@ from dateutil.parser import parse
 # 資料格式 : [車牌],[時間]
 # 時間格式範例： "2019-05-08 23:58:09"
 
-def preprocess():
-    imgFolderPath = r"./images/"  # 放檔案資料夾路徑
-    # ---------------------處理車牌TXT資料-----------#
-    carinfoobject = open(r"./carinfo.txt", "r+")
-    carinfodict = {}
-    carinfo = carinfoobject.readline()
 
-    while carinfo != "":
-        carinfolist = carinfo.split(",")
-        carinfolist[1] = carinfolist[1].replace("\n", "")
-        carinfodict[carinfolist[0]] = carinfolist[1]
-        carinfo = carinfoobject.readline()
-    carinfoobject.close()
-    print(carinfodict)
-    print("carinfo檔案處理完成")
 
 
 class Checkout:
+
+    def preprocess(self):
+        self.imgFolderPath = r"./images/"  # 放檔案資料夾路徑
+        # ---------------------處理車牌TXT資料-----------#
+        carinfoobject = open(r"./carinfo.txt", "r+")
+        self.carinfodict = {}
+        carinfo = carinfoobject.readline()
+
+        while carinfo != "":
+            carinfolist = carinfo.split(",")
+            carinfolist[1] = carinfolist[1].replace("\n", "")
+            self.carinfodict[carinfolist[0]] = carinfolist[1]
+            carinfo = carinfoobject.readline()
+        carinfoobject.close()
+        print(self.carinfodict)
+        print("carinfo檔案處理完成")
+
     def __init__(self):
-        preprocess()
+        self.preprocess()
         self.checkout = Toplevel()
         self.checkout.geometry("300x300")
         self.checkout.maxsize(300, 300)
@@ -76,14 +79,14 @@ class Checkout:
 
     def confirm(self):  #
         boardnum = self.board.get()
-        print(imgFolderPath + boardnum + ".png")
-        if os.path.exists(imgFolderPath + boardnum + ".png"):
+        print(self.imgFolderPath + boardnum + ".png")
+        if os.path.exists(self.imgFolderPath + boardnum + ".png"):
             now = datetime.datetime.now()
             self.currentTime = str(now.strftime("%Y-%m-%d %H:%M:%S"))
-            self.StringVar_plateNumber.set("您的車牌號碼是: "+boardnum)
-            self.StringVar_entryTime.set("入場時間: "+carinfodict[boardnum])
-            self.StringVar_exitTime.set("離場時間: "+self.currentTime)
-            self.StringVar_fee.set("費用: "+self.fee())
+            self.StringVar_plateNumber.set("您的車牌號碼是: " + boardnum)
+            self.StringVar_entryTime.set("入場時間: " + self.carinfodict[boardnum])
+            self.StringVar_exitTime.set("離場時間: " + self.currentTime)
+            self.StringVar_fee.set("費用: " + self.fee())
         else:
             print("找不到您的車牌！請重新輸入！")
 
@@ -91,7 +94,7 @@ class Checkout:
         fee = 0
         boardnum = self.board.get()
         # ========分析入場時間==========#
-        entertime = carinfodict[boardnum]  ###########
+        entertime = self.carinfodict[boardnum]  ###########
         tmpe = entertime.split(" ")
         eyear, emonth, eday = self.parseDate(tmpe[0])  # tmp[0]放的是日期
         ehour, eminute, esecond = self.parseTime(tmpe[1])
@@ -130,6 +133,5 @@ class Checkout:
         minute = tmp[1]
         second = tmp[2]
         return int(hour), int(minute), int(second)
-
 
 # ck = Checkout()

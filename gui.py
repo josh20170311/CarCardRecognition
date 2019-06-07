@@ -8,6 +8,7 @@ from tkinter import messagebox
 from tkinter import filedialog
 import os
 
+
 import GoogleAPI as G
 import ALPR as A
 import checkout_system as C
@@ -73,7 +74,7 @@ class MyApp:
                                        command=self.result_from_google, font=("arial", 15), bg='blue', fg='white')
         self.btn_delete = tkinter.Button(self.window, width=10, height=1, text="DELETE", command=self.delete,
                                          font=("arial", 15), bg='red', fg='white')
-        self.btn_quit = tkinter.Button(self.window, width=10, height=1, text="QUIT", command=self.window.quit,
+        self.btn_quit = tkinter.Button(self.window, width=10, height=1, text="QUIT", command=self.window.destroy,
                                        font=("arial", 15), bg='red', fg='white')
 
         # listbox
@@ -105,7 +106,7 @@ class MyApp:
         self.main_menu.add("cascade", label="File", menu=self.file_menu)
         self.file_menu.add("command", label='Save File', command=self.savefile)
         self.file_menu.add("command", label='Open Image', command=self.opentheimage)
-        self.file_menu.add("command", label='Quit', command=self.window.quit)
+        self.file_menu.add("command", label='Quit', command=self.window.destroy)
         self.main_menu.add("command", label="About", command=self.about)
 
     def savefile(self):  # under construction
