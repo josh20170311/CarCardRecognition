@@ -48,10 +48,10 @@ def alpr(imagefile="TR/images/c13.jpg", image=None, th1=THRESHOLD, th2=MAX):
     cv2.rectangle(org_rec, (250, 370), (405, 430), (0, 255, 0), thickness=2)
     for i in range(0, len(list_results)):
         t = list_results[i]
-        match = re.match(r'^[\w]{6,7}$', t)
         x, y, w, h = list_boxes[i]
+        cv2.putText(org_rec, t, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+        match = re.match(r'^[\w]{6,7}$', t)
         if match:
-            cv2.putText(canny, t, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
             return t, org_rec
     return "Not Found", org_rec
 

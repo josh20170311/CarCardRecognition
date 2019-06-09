@@ -18,8 +18,10 @@ class MyApp:
     # consts
     IMAGE_DIR = "images/"
     NOFILEIMAGE_DIR = "noimagefile.jpg"
+    CAMERA = 0
+    OBS = 1
 
-    def __init__(self, window=tkinter.Tk(), window_title="ALPR", video_source=1):
+    def __init__(self, window=tkinter.Tk(), window_title="ALPR", video_source=CAMERA):
 
         # create a top-window
         self.window = window
@@ -30,7 +32,6 @@ class MyApp:
         # Constants
         self.BASE_X = 900
         self.BASE_Y = 500
-        self.ENABLE_tesseract = 0
 
         # Variables
         self.timeStamp = ""
@@ -38,6 +39,7 @@ class MyApp:
         self.result = tkinter.StringVar(value="Result")
         self.last_index = 0  # listbox
         self.current_image = self.fileName.get()
+        self.ENABLE_tesseract = 0
 
         # init. widgets
         self.initwidgets()
@@ -52,10 +54,13 @@ class MyApp:
 
     def initwidgets(self):
 
+        # frame
+        self.button_area = tkinter.Frame(self.window)
+
         # camera
         self.vid = MyVideoCapture(self.video_source)
 
-        # Image
+        # Tk Image
         self.preview = PIL.ImageTk.PhotoImage(file=self.NOFILEIMAGE_DIR)
 
         # canvas
@@ -67,18 +72,18 @@ class MyApp:
         self.messagebox = messagebox.Message()
 
         # label
-        self.lb = tkinter.Label(self.window, text="Result", textvariable=self.result, font=("arial", 15))
+        self.lb = tkinter.Label(self.button_area, text="Result", textvariable=self.result, font=("arial", 15))
 
         # button
-        self.btn_snapshot = tkinter.Button(self.window, width=10, height=1, text="Snapshot", command=self.snapshot,
+        self.btn_snapshot = tkinter.Button(self.button_area, width=10, height=1, text="Snapshot", command=self.snapshot,
                                            font=("arial", 15), bg='green', fg='white')
-        self.btn_send = tkinter.Button(self.window, width=10, height=1, text="Google API",
+        self.btn_send = tkinter.Button(self.button_area, width=10, height=1, text="Google API",
                                        command=self.result_from_google, font=("arial", 15), bg='blue', fg='white')
-        self.btn_fee = tkinter.Button(self.window, width=10, height=1, text="Fee", command=self.fee,
+        self.btn_fee = tkinter.Button(self.button_area, width=10, height=1, text="Fee", command=self.fee,
                                       font=("arial", 15), bg='red', fg='white')
-        self.btn_quit = tkinter.Button(self.window, width=10, height=1, text="QUIT", command=self.window.destroy,
+        self.btn_quit = tkinter.Button(self.button_area, width=10, height=1, text="QUIT", command=self.window.destroy,
                                        font=("arial", 15), bg='red', fg='white')
-        self.btn_tesseract = tkinter.Button(self.window, width=10, height=1, text='tesseract(off)',
+        self.btn_tesseract = tkinter.Button(self.button_area, width=10, height=1, text='tesseract(off)',
                                             command=self.tesseract_enable, font=("arial", 15), bg='orange')
 
         # listbox
@@ -91,17 +96,18 @@ class MyApp:
         self.makeimageslist()
         self.listb.selection_handle(command=self.selection_event())
 
+
         # layout
         self.canvas.grid(column=0, row=0, ipadx=0, padx=50)
         self.preview_canvas.grid(column=1, row=0)
         self.cb.grid(column=0, row=1)
+        self.button_area.grid(column=1, row=1)
 
-        self.lb.place(x=self.BASE_X, y=self.BASE_Y)
-        self.btn_snapshot.place(x=self.BASE_X, y=self.BASE_Y + 50)
-        self.btn_send.place(x=self.BASE_X, y=self.BASE_Y + 100)
-        self.btn_fee.place(x=self.BASE_X, y=self.BASE_Y + 150)
-        self.btn_quit.place(x=self.BASE_X, y=self.BASE_Y + 200)
-        self.btn_tesseract.place(x=self.BASE_X + 150, y=self.BASE_Y)
+        self.lb.pack()
+        self.btn_tesseract.pack()
+        self.btn_snapshot.pack()
+        self.btn_fee.pack()
+        self.btn_send.pack()
 
     def makemenu(self):
         self.main_menu = tkinter.Menu(self.window)
@@ -142,9 +148,9 @@ class MyApp:
         self.fileName.set("snapshot.png")
 
         # Get a frame from the video source
-        ret, frame = self.vid.get_frame()
+        success, frame = self.vid.get_frame()
 
-        if ret:
+        if success:
             cv2.imwrite("images/" + self.fileName.get(), cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
         self.makeimageslist()
 
@@ -160,7 +166,7 @@ class MyApp:
         with open("carinfo.txt", "a") as f:
             f.write(result + "," + self.getTimeStamp() + "\n")
             f.flush()
-        cv2.imwrite(self.IMAGE_DIR+result+".png", cv2.imread(filename=self.IMAGE_DIR+self.fileName.get()))
+        cv2.imwrite(self.IMAGE_DIR + result + ".png", cv2.imread(filename=self.IMAGE_DIR + self.fileName.get()))
 
     def tesseract_enable(self):
         self.ENABLE_tesseract = ~self.ENABLE_tesseract
