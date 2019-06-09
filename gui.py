@@ -12,7 +12,7 @@ import threading
 import GoogleAPI as G
 import ALPR as A
 import checkout_system as C
-
+import imageManagement as I
 
 class MyApp:
     # consts
@@ -80,21 +80,19 @@ class MyApp:
         self.btn_send = tkinter.Button(self.button_area, width=10, height=1, text="Google API",
                                        command=self.result_from_google, font=("arial", 15), bg='blue', fg='white')
         self.btn_fee = tkinter.Button(self.button_area, width=10, height=1, text="Fee", command=self.fee,
-                                      font=("arial", 15), bg='red', fg='white')
+                                      font=("arial", 15), bg='green', fg='white')
         self.btn_quit = tkinter.Button(self.button_area, width=10, height=1, text="QUIT", command=self.window.destroy,
                                        font=("arial", 15), bg='red', fg='white')
         self.btn_tesseract = tkinter.Button(self.button_area, width=10, height=1, text='tesseract(off)',
                                             command=self.tesseract_enable, font=("arial", 15), bg='orange')
-
-        # listbox
-        self.listb = tkinter.Listbox(self.window, height=20, width=58, font=("arial", 15))
+        self.btn_images = tkinter.Button(self.button_area, width=10, height=1, text="Images", command=self.image_window,
+                                      font=("arial", 15), bg='green', fg='white')
 
         # combobox
         self.cb = tkinter.ttk.Combobox(self.window, width=58, textvariable=self.fileName)
 
         # pre-process
         self.makeimageslist()
-        self.listb.selection_handle(command=self.selection_event())
 
 
         # layout
@@ -103,11 +101,13 @@ class MyApp:
         self.cb.grid(column=0, row=1)
         self.button_area.grid(column=1, row=1)
 
-        self.lb.pack()
-        self.btn_tesseract.pack()
-        self.btn_snapshot.pack()
-        self.btn_fee.pack()
-        self.btn_send.pack()
+        self.lb.grid(column=0, row=0)
+        self.btn_tesseract.grid(column=0, row=1)
+        self.btn_snapshot.grid(column=0, row=2)
+        self.btn_send.grid(column=0, row=3)
+        self.btn_images.grid(column=1, row=1)
+        self.btn_fee.grid(column=1, row=2)
+        self.btn_quit.grid(column=1, row=3)
 
     def makemenu(self):
         self.main_menu = tkinter.Menu(self.window)
@@ -156,6 +156,9 @@ class MyApp:
 
     def fee(self):  # under construction
         app2 = C.Checkout()
+
+    def image_window(self):
+        app3 = I.imageMangement()
 
     def getTimeStamp(self):
         return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
