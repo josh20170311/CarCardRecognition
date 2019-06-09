@@ -14,6 +14,7 @@ import ALPR as A
 import checkout_system as C
 import imageManagement as I
 
+
 class MyApp:
     # consts
     IMAGE_DIR = "images/"
@@ -21,7 +22,7 @@ class MyApp:
     CAMERA = 0
     OBS = 1
 
-    def __init__(self, window=tkinter.Tk(), window_title="ALPR", video_source=CAMERA):
+    def __init__(self, window=tkinter.Tk(), window_title="ALPR", video_source=OBS):
 
         # create a top-window
         self.window = window
@@ -36,6 +37,7 @@ class MyApp:
         # Variables
         self.timeStamp = ""
         self.fileName = tkinter.StringVar(value=os.listdir(self.IMAGE_DIR)[0])
+        self.filedir = self.IMAGE_DIR+self.fileName.get()
         self.result = tkinter.StringVar(value="Result")
         self.last_index = 0  # listbox
         self.current_image = self.fileName.get()
@@ -86,14 +88,13 @@ class MyApp:
         self.btn_tesseract = tkinter.Button(self.button_area, width=10, height=1, text='tesseract(off)',
                                             command=self.tesseract_enable, font=("arial", 15), bg='orange')
         self.btn_images = tkinter.Button(self.button_area, width=10, height=1, text="Images", command=self.image_window,
-                                      font=("arial", 15), bg='green', fg='white')
+                                         font=("arial", 15), bg='green', fg='white')
 
         # combobox
         self.cb = tkinter.ttk.Combobox(self.window, width=58, textvariable=self.fileName)
 
         # pre-process
         self.makeimageslist()
-
 
         # layout
         self.canvas.grid(column=0, row=0, ipadx=0, padx=50)
@@ -122,13 +123,26 @@ class MyApp:
     def savefile(self):  # under construction
         pass
 
-    def opentheimage(self):  # under construction
-        askfilename = filedialog.askopenfilename(filetypes=(("png files", "*.png"), ("all files", "*.*")))
-        print(askfilename)
+    def opentheimage(self):
+        askfilename = filedialog.askopenfilename(
+            filetypes=(("all files", "*.*"), ("png files", "*.png"), ("jpg files", "*.jpg")))
+        self.filedir=askfilename
+        img = self.resize(askfilename)
+        self.preview = PIL.ImageTk.PhotoImage(img)
+        self.preview_canvas.create_image(0, 0, image=self.preview, anchor=tkinter.NW)
 
+    def resize(self, filename):
+        img = PIL.Image.open(filename)
+        w, h = img.size
+
+        if w > 640:
+            r = 640 / w
+            h *= r
+            img = img.resize((640, int(h)), PIL.Image.ANTIALIAS)
+        return img
     def about(self):  # under construction
         messagebox.showinfo(title='about',
-                            detail='Reference : \nPython OpenCV - show a video in a Tkinter window by Paul')
+                            detail='main window by Josh\nfee window by Falice\nimage window by c444569\nReference : \nPython OpenCV - show a video in a Tkinter window by Paul')
 
     def makeimageslist(self):
         imlist = os.listdir('./images')
@@ -136,16 +150,20 @@ class MyApp:
 
     def selection_event(self):
         if self.last_index != self.cb.get():
-            self.preview = PIL.ImageTk.PhotoImage(file=self.IMAGE_DIR + self.cb.get())
+            filename = self.IMAGE_DIR + self.cb.get()
+            img = self.resize(filename)
+            self.preview = PIL.ImageTk.PhotoImage(img)
             #  self.preview = self.preview.zoom(24)  # zoom in
             #  self.preview = self.preview.subsample(int(self.preview.height() / 250))  # zoom out
 
             self.preview_canvas.create_image(0, 0, image=self.preview, anchor=tkinter.NW)
+            self.filedir = self.IMAGE_DIR+self.fileName.get()
             self.last_index = self.cb.get()
 
     def snapshot(self):
         self.timeStamp = self.getTimeStamp()
         self.fileName.set("snapshot.png")
+        self.filedir = self.IMAGE_DIR+self.fileName.get()
 
         # Get a frame from the video source
         success, frame = self.vid.get_frame()
@@ -164,7 +182,7 @@ class MyApp:
         return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     def result_from_google(self):
-        result = G.send(imagefile=self.IMAGE_DIR + self.fileName.get())
+        result = G.send(self.filedir)
         messagebox.showinfo(title="result", detail=result)
         with open("carinfo.txt", "a") as f:
             f.write(result + "," + self.getTimeStamp() + "\n")

@@ -20,14 +20,20 @@ class imageMangement:
 
         self.deletebtn = tkinter.Button(self.window, text="刪除",command=self.deleteImgage,width=20, height=10,bg="pink",fg="white",font="30")
         self.deletebtn.place(x=500, y=500)
+        self.name = StringVar()
+        self.lab = tkinter.Label(self.window, textvariable=self.name)
+
+
+
+        self.lab.grid(column=1, row=2)
+
         self.show_canvas()
         self.x_place=450
         self.y_place=0
         self.show_Thumbnail()
 
 
-
-        #self.window.mainloop()
+        self.window.mainloop()
 
 
 
@@ -44,10 +50,17 @@ class imageMangement:
 
     # 點擊縮圖顯示圖片
     def show_Image(self,n):
+        self.pil_image = Image.open(n)
+        self.w, self.h = self.pil_image.size  # 獲取圖片的原始大小
+        self.preview = ImageTk.PhotoImage(file="noimagefile.jpg") #重新抓一次大小
+        self.pil_image_resized = self.resize(self.w, self.h, self.preview.width(),self.preview.height() )  # 縮放圖片讓它保持比例，同時限制在一個矩形框範圍內
 
-        self.preview = ImageTk.PhotoImage(file=n)
+        self.preview = ImageTk.PhotoImage(self.pil_image_resized)
         self.preview_canvas.create_image(0, 0, image=self.preview, anchor=tkinter.NW)
         self.preview_canvas.grid(column=1, row=0)
+        n_split=n.split("/")
+        self.name.set(n_split[1])
+
         self.selectImgae=n
 
 
