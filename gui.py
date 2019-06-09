@@ -7,11 +7,12 @@ import time
 from tkinter import messagebox
 from tkinter import filedialog
 import os
-
+import threading
 
 import GoogleAPI as G
 import ALPR as A
 import checkout_system as C
+
 
 class MyApp:
     # consts
@@ -29,6 +30,7 @@ class MyApp:
         # Constants
         self.BASE_X = 900
         self.BASE_Y = 500
+        self.ENABLE_tesseract = 0
 
         # Variables
         self.timeStamp = ""
@@ -72,17 +74,18 @@ class MyApp:
                                            font=("arial", 15), bg='green', fg='white')
         self.btn_send = tkinter.Button(self.window, width=10, height=1, text="Google API",
                                        command=self.result_from_google, font=("arial", 15), bg='blue', fg='white')
-        self.btn_delete = tkinter.Button(self.window, width=10, height=1, text="DELETE", command=self.delete,
-                                         font=("arial", 15), bg='red', fg='white')
+        self.btn_fee = tkinter.Button(self.window, width=10, height=1, text="Fee", command=self.fee,
+                                      font=("arial", 15), bg='red', fg='white')
         self.btn_quit = tkinter.Button(self.window, width=10, height=1, text="QUIT", command=self.window.destroy,
                                        font=("arial", 15), bg='red', fg='white')
+        self.btn_tesseract = tkinter.Button(self.window, width=10, height=1, text='tesseract(off)',
+                                            command=self.tesseract_enable, font=("arial", 15), bg='orange')
 
         # listbox
         self.listb = tkinter.Listbox(self.window, height=20, width=58, font=("arial", 15))
 
         # combobox
         self.cb = tkinter.ttk.Combobox(self.window, width=58, textvariable=self.fileName)
-
 
         # pre-process
         self.makeimageslist()
@@ -96,8 +99,9 @@ class MyApp:
         self.lb.place(x=self.BASE_X, y=self.BASE_Y)
         self.btn_snapshot.place(x=self.BASE_X, y=self.BASE_Y + 50)
         self.btn_send.place(x=self.BASE_X, y=self.BASE_Y + 100)
-        self.btn_delete.place(x=self.BASE_X, y=self.BASE_Y + 150)
+        self.btn_fee.place(x=self.BASE_X, y=self.BASE_Y + 150)
         self.btn_quit.place(x=self.BASE_X, y=self.BASE_Y + 200)
+        self.btn_tesseract.place(x=self.BASE_X + 150, y=self.BASE_Y)
 
     def makemenu(self):
         self.main_menu = tkinter.Menu(self.window)
@@ -117,22 +121,21 @@ class MyApp:
         print(askfilename)
 
     def about(self):  # under construction
-        messagebox.showinfo(title='about', detail='Reference : \nPython OpenCV - show a video in a Tkinter window by Paul')
+        messagebox.showinfo(title='about',
+                            detail='Reference : \nPython OpenCV - show a video in a Tkinter window by Paul')
 
     def makeimageslist(self):
         imlist = os.listdir('./images')
         self.cb['values'] = imlist
 
     def selection_event(self):
-        if self.listb.curselection() != () and self.listb.curselection() != self.last_index:
-            self.fileName.set(self.listb.get(self.listb.curselection()))
-            self.preview = tkinter.PhotoImage(file='images/' + self.listb.get(self.listb.curselection()))
-
+        if self.last_index != self.cb.get():
+            self.preview = PIL.ImageTk.PhotoImage(file=self.IMAGE_DIR + self.cb.get())
             #  self.preview = self.preview.zoom(24)  # zoom in
             #  self.preview = self.preview.subsample(int(self.preview.height() / 250))  # zoom out
 
             self.preview_canvas.create_image(0, 0, image=self.preview, anchor=tkinter.NW)
-            self.last_index = self.listb.curselection()
+            self.last_index = self.cb.get()
 
     def snapshot(self):
         self.timeStamp = self.getTimeStamp()
@@ -145,7 +148,7 @@ class MyApp:
             cv2.imwrite("images/" + self.fileName.get(), cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
         self.makeimageslist()
 
-    def delete(self):  # under construction
+    def fee(self):  # under construction
         app2 = C.Checkout()
 
     def getTimeStamp(self):
@@ -155,27 +158,29 @@ class MyApp:
         result = G.send(imagefile=self.IMAGE_DIR + self.fileName.get())
         messagebox.showinfo(title="result", detail=result)
         with open("carinfo.txt", "a") as f:
-            f.write(result+","+self.getTimeStamp()+"\n")
+            f.write(result + "," + self.getTimeStamp() + "\n")
             f.flush()
         # messagebox.showinfo(title='nothing', message='nothing', detail='you have to uncomment the function')
 
-    def ALPR(self):  # under construction
-        print(self.IMAGE_DIR + self.current_image)
-        org = cv2.imread(self.IMAGE_DIR + self.current_image)
-        print(A.alpr(image=org))
-        # messagebox.showinfo(message=A.alpr(image=org))
-        # self.result.set(A.alpr(image=self.vid.get_frame()[1]))
+    def tesseract_enable(self):
+        self.ENABLE_tesseract = ~self.ENABLE_tesseract
+        if self.ENABLE_tesseract:
+            self.btn_tesseract['text'] = "tesseract(on)"
+        else:
+            self.btn_tesseract['text'] = 'tesseract(off)'
 
     def update(self):
         # Get a frame from the video source
         success, frame = self.vid.get_frame()
-        print(self.cb.get())
 
-        t, rec = A.alpr(image=frame)
-        self.result.set(t)
+        A.makeROI(frame)
+
+        if self.ENABLE_tesseract:
+            text, frame = A.alpr(image=frame)
+            self.result.set(text)
 
         if success:
-            self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(rec))
+            self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame))
             self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
 
         self.selection_event()
