@@ -6,6 +6,7 @@ import re
 from google.cloud import vision
 from google.cloud.vision import types
 
+import ALPR as A
 
 def send(imagefile="TR/images/c2.jpg"):
     # instantiates a client
@@ -25,10 +26,13 @@ def send(imagefile="TR/images/c2.jpg"):
     labels = response.text_annotations
 
     # Extract the text
-    testlist = labels[0].description.split("\n")
-    print('Labels:')
-    for i in testlist:
-        match = re.match(r"^[\w]{2,4}[-, ][\w]{2,4}$", i)
+    textlist = labels[0].description.split("\n")
+    print(textlist)
+
+    for i in textlist:
+        i = A.formatk(i)
+        print(i)
+        match = re.match(r"^[\w]{6,7}$", i)
         if match:
             return i
 
