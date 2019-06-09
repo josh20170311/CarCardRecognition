@@ -160,7 +160,7 @@ class MyApp:
         with open("carinfo.txt", "a") as f:
             f.write(result + "," + self.getTimeStamp() + "\n")
             f.flush()
-        # messagebox.showinfo(title='nothing', message='nothing', detail='you have to uncomment the function')
+        cv2.imwrite(self.IMAGE_DIR+result+".png", cv2.imread(filename=self.IMAGE_DIR+self.fileName.get()))
 
     def tesseract_enable(self):
         self.ENABLE_tesseract = ~self.ENABLE_tesseract
