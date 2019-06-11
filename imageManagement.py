@@ -19,7 +19,13 @@ class imageMangement:
 
         self.deletebtn = tkinter.Button(self.window, text="刪除", command=self.deleteImgage, width=20, height=10,
                                         bg="pink", fg="white", font="30")
+        self.chosebtn = tkinter.Button(self.window, text="選擇", command=self.chose, width=20, height=10,
+                                        bg="pink", fg="white", font="30")
+
+
         self.deletebtn.place(x=500, y=500)
+        self.chosebtn.place(x=750, y=500)
+
         self.name = StringVar(value='None')
         self.lab = tkinter.Label(self.window, textvariable=self.name)
 
@@ -81,7 +87,7 @@ class imageMangement:
                                       height=self.h_box, command=partial(self.show_Image, self.fileName), bd=0)
             self.img.place(x=self.x_place, y=self.y_place)
 
-        self.window.mainloop()
+        # self.window.mainloop()
 
     def resize(self, w, h, w_box, h_box):
         self.f1 = 1.0 * w_box / w
@@ -96,3 +102,10 @@ class imageMangement:
         self.x_place = 450
         self.y_place = 0
         self.show_Thumbnail()
+
+    def chose(self):
+        f = open("f", "w+")
+        f.write(self.name.get())
+        f.flush()
+        f.close()
+        self.window.destroy()

@@ -30,6 +30,7 @@ class MyApp:
         self.window.geometry("1366x768")
         self.video_source = video_source
 
+
         # Constants
         self.BASE_X = 900
         self.BASE_Y = 500
@@ -184,8 +185,6 @@ class MyApp:
 
     def image_window(self):
         app3 = I.imageMangement()
-        self.fileName.set(I.fileName)
-        print(I.fileName)
 
     def getTimeStamp(self):
         return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -238,6 +237,13 @@ class MyApp:
         if success:
             self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame))
             self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
+
+        if os.path.isfile("f"):
+            f = open("f", 'r')
+            self.fileName.set(f.read())
+            f.close()
+            os.remove("f")
+
 
         self.selection_event()
         self.window.after(self.delay, self.update)
