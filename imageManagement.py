@@ -14,22 +14,25 @@ class imageMangement:
         self.windowWidth = 1600  # 視窗寬
         self.windowHeight = 900  # 視窗高
         self.screenWidth, screenHeight = self.window.maxsize()  # 獲得螢幕寬和高
-        self.window.geometry("1366x768")
+        self.window.geometry("1300x680")
         self.window.wm_attributes('-topmost', 1)  # 視窗置頂
 
-        self.deletebtn = tkinter.Button(self.window, text="刪除", command=self.deleteImgage, width=20, height=10,
+        self.panel = tkinter.Frame(self.window)
+        self.deletebtn = tkinter.Button(self.panel, text="刪除", command=self.deleteImgage, width=20, height=10,
                                         bg="pink", fg="white", font="30")
-        self.chosebtn = tkinter.Button(self.window, text="選擇", command=self.chose, width=20, height=10,
+        self.chosebtn = tkinter.Button(self.panel, text="選擇", command=self.chose, width=20, height=10,
                                         bg="pink", fg="white", font="30")
 
 
-        self.deletebtn.place(x=500, y=500)
-        self.chosebtn.place(x=750, y=500)
 
         self.name = StringVar(value='None')
         self.lab = tkinter.Label(self.window, textvariable=self.name)
 
         self.lab.grid(column=1, row=2)
+        self.panel.grid(column=1, row=3)
+
+        self.deletebtn.grid(column=0, row=0)
+        self.chosebtn.grid(column=1, row=0)
 
         self.show_canvas()
         self.x_place = 450

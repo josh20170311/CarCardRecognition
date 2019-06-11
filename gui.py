@@ -27,7 +27,7 @@ class MyApp:
         # create a top-window
         self.window = window
         self.window.title(window_title)
-        self.window.geometry("1366x768")
+        self.window.geometry("1300x680")
         self.video_source = video_source
 
 
@@ -101,10 +101,10 @@ class MyApp:
         self.makeimageslist()
 
         # layout
-        self.canvas.grid(column=0, row=0, ipadx=0, padx=50)
-        self.preview_canvas.grid(column=1, row=0)
-        self.cb.grid(column=0, row=1)
-        self.panel.grid(column=1, row=1)
+        self.canvas.grid(column=0, row=0, sticky='w')
+        self.preview_canvas.grid(column=1, row=0, sticky='e')
+        self.cb.grid(column=0, row=1, sticky='ne')
+        self.panel.grid(column=1, row=1, sticky='nw')
 
         # panel
         self.lb.grid(column=0, row=0)
@@ -122,13 +122,9 @@ class MyApp:
         self.window.config(menu=self.main_menu)
         self.file_menu = tkinter.Menu(tearoff=False)
         self.main_menu.add("cascade", label="File", menu=self.file_menu)
-        self.file_menu.add("command", label='Save File', command=self.savefile)
         self.file_menu.add("command", label='Open Image', command=self.opentheimage)
         self.file_menu.add("command", label='Quit', command=self.window.destroy)
         self.main_menu.add("command", label="About", command=self.about)
-
-    def savefile(self):  # under construction
-        pass
 
     def opentheimage(self):
         askfilename = filedialog.askopenfilename(
