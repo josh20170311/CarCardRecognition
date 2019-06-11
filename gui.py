@@ -37,11 +37,12 @@ class MyApp:
         # Variables
         self.timeStamp = ""
         self.fileName = tkinter.StringVar(value=os.listdir(self.IMAGE_DIR)[0])
-        self.filedir = self.IMAGE_DIR+self.fileName.get()
+        self.filedir = self.IMAGE_DIR + self.fileName.get()
         self.result = tkinter.StringVar(value="Result")
         self.last_index = 0  # listbox
         self.current_image = self.fileName.get()
         self.ENABLE_tesseract = 0
+        self.ENABLE_charRecognition = 0
 
         # init. widgets
         self.initwidgets()
@@ -57,7 +58,7 @@ class MyApp:
     def initwidgets(self):
 
         # frame
-        self.button_area = tkinter.Frame(self.window)
+        self.panel = tkinter.Frame(self.window)
 
         # camera
         self.vid = MyVideoCapture(self.video_source)
@@ -74,20 +75,22 @@ class MyApp:
         self.messagebox = messagebox.Message()
 
         # label
-        self.lb = tkinter.Label(self.button_area, text="Result", textvariable=self.result, font=("arial", 15))
+        self.lb = tkinter.Label(self.panel, text="Result", textvariable=self.result, font=("arial", 15))
 
         # button
-        self.btn_snapshot = tkinter.Button(self.button_area, width=10, height=1, text="Snapshot", command=self.snapshot,
+        self.btn_snapshot = tkinter.Button(self.panel, width=10, height=1, text="Snapshot", command=self.snapshot,
                                            font=("arial", 15), bg='green', fg='white')
-        self.btn_send = tkinter.Button(self.button_area, width=10, height=1, text="Google API",
+        self.btn_send = tkinter.Button(self.panel, width=10, height=1, text="Google API",
                                        command=self.result_from_google, font=("arial", 15), bg='blue', fg='white')
-        self.btn_fee = tkinter.Button(self.button_area, width=10, height=1, text="Fee", command=self.fee,
+        self.btn_fee = tkinter.Button(self.panel, width=10, height=1, text="Checkout", command=self.fee,
                                       font=("arial", 15), bg='green', fg='white')
-        self.btn_quit = tkinter.Button(self.button_area, width=10, height=1, text="QUIT", command=self.window.destroy,
+        self.btn_quit = tkinter.Button(self.panel, width=10, height=1, text="QUIT", command=self.window.destroy,
                                        font=("arial", 15), bg='red', fg='white')
-        self.btn_tesseract = tkinter.Button(self.button_area, width=10, height=1, text='tesseract(off)',
+        self.btn_tesseract = tkinter.Button(self.panel, width=10, height=1, text='tesseract(off)',
                                             command=self.tesseract_enable, font=("arial", 15), bg='orange')
-        self.btn_images = tkinter.Button(self.button_area, width=10, height=1, text="Images", command=self.image_window,
+        self.btn_charRecognition = tkinter.Button(self.panel, width=20, height=1, text='charRecognition(off)',
+                                                  command=self.charRecognition_enable, font=("arial", 15), bg='orange')
+        self.btn_images = tkinter.Button(self.panel, width=10, height=1, text="Images", command=self.image_window,
                                          font=("arial", 15), bg='green', fg='white')
 
         # combobox
@@ -100,15 +103,18 @@ class MyApp:
         self.canvas.grid(column=0, row=0, ipadx=0, padx=50)
         self.preview_canvas.grid(column=1, row=0)
         self.cb.grid(column=0, row=1)
-        self.button_area.grid(column=1, row=1)
+        self.panel.grid(column=1, row=1)
 
+        # panel
         self.lb.grid(column=0, row=0)
         self.btn_tesseract.grid(column=0, row=1)
         self.btn_snapshot.grid(column=0, row=2)
         self.btn_send.grid(column=0, row=3)
-        self.btn_images.grid(column=1, row=1)
-        self.btn_fee.grid(column=1, row=2)
-        self.btn_quit.grid(column=1, row=3)
+
+        self.btn_charRecognition.grid(column=1, row=1)
+        self.btn_images.grid(column=1, row=2, sticky='w')
+        self.btn_fee.grid(column=1, row=3, sticky='w')
+        self.btn_quit.grid(column=1, row=4, sticky='w')
 
     def makemenu(self):
         self.main_menu = tkinter.Menu(self.window)
@@ -126,7 +132,7 @@ class MyApp:
     def opentheimage(self):
         askfilename = filedialog.askopenfilename(
             filetypes=(("all files", "*.*"), ("png files", "*.png"), ("jpg files", "*.jpg")))
-        self.filedir=askfilename
+        self.filedir = askfilename
         img = self.resize(askfilename)
         self.preview = PIL.ImageTk.PhotoImage(img)
         self.preview_canvas.create_image(0, 0, image=self.preview, anchor=tkinter.NW)
@@ -140,9 +146,10 @@ class MyApp:
             h *= r
             img = img.resize((640, int(h)), PIL.Image.ANTIALIAS)
         return img
+
     def about(self):  # under construction
         messagebox.showinfo(title='about',
-                            detail='main window by Josh\nfee window by Falice\nimage window by c444569\nReference : \nPython OpenCV - show a video in a Tkinter window by Paul')
+                            detail='main window by Josh\ncheckout window by Falice\nimage window by c444569\nReference : \nPython OpenCV - show a video in a Tkinter window by Paul')
 
     def makeimageslist(self):
         imlist = os.listdir('./images')
@@ -157,13 +164,13 @@ class MyApp:
             #  self.preview = self.preview.subsample(int(self.preview.height() / 250))  # zoom out
 
             self.preview_canvas.create_image(0, 0, image=self.preview, anchor=tkinter.NW)
-            self.filedir = self.IMAGE_DIR+self.fileName.get()
+            self.filedir = self.IMAGE_DIR + self.fileName.get()
             self.last_index = self.cb.get()
 
     def snapshot(self):
         self.timeStamp = self.getTimeStamp()
         self.fileName.set("snapshot.png")
-        self.filedir = self.IMAGE_DIR+self.fileName.get()
+        self.filedir = self.IMAGE_DIR + self.fileName.get()
 
         # Get a frame from the video source
         success, frame = self.vid.get_frame()
@@ -177,6 +184,8 @@ class MyApp:
 
     def image_window(self):
         app3 = I.imageMangement()
+        self.fileName.set(I.fileName)
+        print(I.fileName)
 
     def getTimeStamp(self):
         return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -191,20 +200,40 @@ class MyApp:
 
     def tesseract_enable(self):
         self.ENABLE_tesseract = ~self.ENABLE_tesseract
+        self.ENABLE_charRecognition = 0
         if self.ENABLE_tesseract:
             self.btn_tesseract['text'] = "tesseract(on)"
+            self.btn_charRecognition['text'] = 'charRecognition(off)'
         else:
             self.btn_tesseract['text'] = 'tesseract(off)'
+
+    def charRecognition_enable(self):
+        self.ENABLE_tesseract = 0
+        self.ENABLE_charRecognition = ~self.ENABLE_charRecognition
+        if self.ENABLE_charRecognition:
+            self.btn_charRecognition['text'] = "charRecognition(on)"
+            self.btn_tesseract['text'] = "'tesseract(off)'"
+        else:
+            self.btn_charRecognition['text'] = 'charRecognition(off)'
 
     def update(self):
         # Get a frame from the video source
         success, frame = self.vid.get_frame()
 
-        A.makeROI(frame)
-
         if self.ENABLE_tesseract:
+            time1 = time.time()
             text, frame = A.alpr(image=frame)
+            time2 = time.time()
+            print("time : ", time2 - time1)
             self.result.set(text)
+
+        if self.ENABLE_charRecognition:
+            time1 = time.time()
+            text = A.characterRecognition(frame)
+            time2 = time.time()
+            print("time : ", time2 - time1)
+            self.result.set(text)
+            A.displayROI(frame)
 
         if success:
             self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame))
