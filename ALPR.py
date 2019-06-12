@@ -2,6 +2,7 @@ import cv2
 import pytesseract
 import re
 import os
+import time
 
 KSIZE = 3
 SIGMA_X = 20

@@ -22,7 +22,7 @@ class MyApp:
     CAMERA = 0
     OBS = 1
 
-    def __init__(self, window=tkinter.Tk(), window_title="ALPR", video_source=OBS):
+    def __init__(self, window=tkinter.Tk(), window_title="ALPR", video_source=CAMERA):
 
         # create a top-window
         self.window = window
